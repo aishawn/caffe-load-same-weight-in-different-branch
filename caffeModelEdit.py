@@ -11,15 +11,23 @@ sys.path.insert(0,caffe_root+'python')
 from caffe import Net,TEST
 import caffe
 
+import numpy as np
 
+net = Net('/data/mgn_caffe/resnet50/ResNet-50-deploy.prototxt', '/data/mgn_caffe/resnet50/ResNet-50-model.caffemodel', caffe.TEST)
+netNew = Net('/data/mgn_caffe/resnet50/ResNet-50-deploy-3.prototxt',caffe.TEST)
 
-n_orig = Net('/data/mgn_caffe/resnet50/ResNet-50-deploy.prototxt', '/data/mgn_caffe/resnet50/ResNet-50-model.caffemodel', 0)
-n_new = Net('/data/mgn_caffe/resnet50/ResNet-50-deploy-2.prototxt', '/data/mgn_caffe/resnet50/ResNet-50-model.caffemodel',0)
+for k1, v1 in netNew.params.items():			 
+    for k, v in net.params.items():
+    #print (k, v[0].data.shape)
+    #print np.size(net.params[k])
+        for i in range(np.size(net.params[k])):
+             if (k1==k+'_3'):
+                  print(k1)
+                  netNew.params[k1][i].data[:] = np.copy(net.params[k][i].data[:])			
+        for i in range(np.size(net.params[k])):
+             if (k1==k):
+                  print(k1)
+                  netNew.params[k][i].data[:] = np.copy(net.params[k][i].data[:])				 
+netNew.save('/data/mgn_caffe/resnet50/ResNet-50-model-3.caffemodel')
+			 
 
-for orig_name in n_orig.params:
-    for new_name in n_new.params:
-	    if (new_name == orig_name+'_2'):		 
-             n_new.params[new_name] = n_orig.params[orig_name]
-             print(new_name)
-
-n_new.save('/data/mgn_caffe/resnet50/ResNet-50-model-2.caffemodel')
